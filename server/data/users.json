@@ -1,0 +1,43 @@
+[
+  {
+    "id": "u_admin_001",
+    "name": "System Admin",
+    "email": "admin@dbuu.ac.in",
+    "phone": "9876543200",
+    "passwordHash": "$2b$10$vg/55BhgBawTuovlu4UWbOVEy4vlCernIA.ys7p19aldOgZ4AFooK",
+    "role": "ADMIN",
+    "createdAt": "2026-08-28T18:43:06.034Z"
+  },
+  {
+    "id": "u_owner_001",
+    "name": "Amit Sharma",
+    "email": "owner@dbuu.ac.in",
+    "phone": "9876543210",
+    "passwordHash": "$2b$10$xA4qbnUUc6pbWCzupIap1eGFzmiku5NTsbh6JZSQ1RTtiaw5d3P.O",
+    "role": "OWNER",
+    "createdAt": "2026-08-28T18:43:06.034Z"
+  },
+  {
+    "id": "u_student_001",
+    "name": "Aditya Kumar",
+    "email": "student@dbuu.ac.in",
+    "phone": "9876501234",
+    "passwordHash": "$2b$10$PMoleyI1BMdn2nbRlnYseeAFTdXbtkEhr4Q2mlggo6pg0vnT0qqmi",
+    "role": "STUDENT",
+    "lookingFor": "PG",
+    "budget": 8000,
+    "createdAt": "2026-08-28T18:43:06.034Z"
+  },
+  {
+    "id": "doc_1787944370893_7ipdxa",
+    "name": "ashu",
+    "email": "ashu@gmail.com",
+    "phone": "9877704569",
+    "passwordHash": "$2b$10$3DaTM1dMgrHkf4Vrz/NPsOdV2q2ZysYnHM8CkLgnmpKWpvJ0FY4cy",
+    "role": "OWNER",
+    "lookingFor": "PG",
+    "budget": 8000,
+    "createdAt": "2026-08-28T19:12:50.893Z",
+    "updatedAt": "2026-08-28T19:12:50.893Z"
+  }
+]
