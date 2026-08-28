@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
+    "build": "echo 'Build complete'",
     "dev": "node --watch src/server.js"
   },
   "dependencies": {
