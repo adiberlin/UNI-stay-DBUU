@@ -1,8 +1,9 @@
 // ============================================================
-// src/services/authService.ts — Real Backend Auth Service
+// src/services/authService.ts — Real Backend Auth Service + Client Fallback
 // ============================================================
 
 import { apiRequest, setStoredToken, removeStoredToken, getStoredToken } from './api';
+import { clientStorage } from './clientStorage';
 import type { UserProfile, UserRole } from '../types/property';
 
 export interface LoginCredentials {
@@ -32,30 +33,44 @@ export const authService = {
    * POST /api/auth/login
    */
   async login(credentials: LoginCredentials): Promise<UserProfile> {
-    const data = await apiRequest<AuthResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    try {
+      const data = await apiRequest<AuthResponse>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
 
-    if (data.token) {
-      setStoredToken(data.token);
+      if (data.token) {
+        setStoredToken(data.token);
+      }
+      return data.user;
+    } catch {
+      // Backend not running / Netlify static mode fallback
+      const user = clientStorage.login(credentials);
+      setStoredToken(`mock_token_${user.id}`);
+      return user;
     }
-    return data.user;
   },
 
   /**
    * POST /api/auth/register
    */
   async register(data: RegisterData): Promise<UserProfile> {
-    const res = await apiRequest<AuthResponse>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    try {
+      const res = await apiRequest<AuthResponse>('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
 
-    if (res.token) {
-      setStoredToken(res.token);
+      if (res.token) {
+        setStoredToken(res.token);
+      }
+      return res.user;
+    } catch {
+      // Backend not running / Netlify static mode fallback
+      const user = clientStorage.register(data);
+      setStoredToken(`mock_token_${user.id}`);
+      return user;
     }
-    return res.user;
   },
 
   /**
@@ -65,12 +80,15 @@ export const authService = {
     const token = getStoredToken();
     if (!token) return null;
 
+    if (token.startsWith('mock_token_')) {
+      return clientStorage.getCurrentUser();
+    }
+
     try {
       const data = await apiRequest<{ user: UserProfile }>('/auth/me');
       return data.user;
     } catch {
-      removeStoredToken();
-      return null;
+      return clientStorage.getCurrentUser();
     }
   },
 
@@ -81,8 +99,9 @@ export const authService = {
     try {
       await apiRequest('/auth/logout', { method: 'POST' });
     } catch {
-      // Ignore network errors on logout
+      // Ignore network errors
     } finally {
+      clientStorage.logout();
       removeStoredToken();
     }
   },
@@ -91,11 +110,15 @@ export const authService = {
    * PUT /api/auth/profile
    */
   async updateProfile(updates: Partial<UserProfile>): Promise<UserProfile> {
-    const res = await apiRequest<{ user: UserProfile; message: string }>('/auth/profile', {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
-    return res.user;
+    try {
+      const res = await apiRequest<{ user: UserProfile; message: string }>('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+      });
+      return res.user;
+    } catch {
+      return clientStorage.updateProfile(updates);
+    }
   },
 
   isLoggedIn(): boolean {

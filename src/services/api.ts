@@ -35,17 +35,27 @@ export async function apiRequest<T = any>(
     ...(options.headers as Record<string, string> || {}),
   };
 
-  if (token) {
+  if (token && !token.startsWith('mock_token_')) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const baseUrl = import.meta.env.VITE_API_URL || '/api';
+  const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  
+  const url = endpoint.startsWith('http') ? endpoint : `${cleanBase}${cleanEndpoint}`;
 
   try {
     const response = await fetch(url, {
       ...options,
       headers,
     });
+
+    // Check if the response is actually JSON (avoid HTML index.html fallback)
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new ApiError('Endpoint returned non-JSON response (possibly static host fallback)', response.status);
+    }
 
     const data = await response.json().catch(() => ({}));
 
