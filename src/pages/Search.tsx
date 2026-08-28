@@ -4,9 +4,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, LayoutGrid, Map } from 'lucide-react';
 import { PropertyGrid } from '../components/PropertyGrid';
 import { FilterSidebar } from '../components/FilterSidebar';
+import { SearchMapView } from '../components/SearchMapView';
 import { propertyService } from '../services/propertyService';
 import { useAuth } from '../context/AuthContext';
 import type { SearchFilters, PropertyType, RoomType, Property } from '../types/property';
@@ -40,6 +41,7 @@ export function Search() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [filters, setFilters] = useState<Partial<SearchFilters>>(DEFAULT_FILTERS);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [loading, setLoading] = useState(true);
   const { toasts, addToast, removeToast } = useToast();
 
@@ -203,6 +205,32 @@ export function Search() {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
+                {/* View Mode Toggle: Grid vs Map */}
+                <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-white text-indigo-700 shadow-2xs'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <LayoutGrid size={13} />
+                    Grid
+                  </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      viewMode === 'map'
+                        ? 'bg-white text-indigo-700 shadow-2xs'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Map size={13} />
+                    Map View
+                  </button>
+                </div>
+
                 {/* Available Only Toggle */}
                 <button
                   onClick={() => updateFilters({ availability: isAvailableOnly ? '' : 'VACANT' })}
@@ -256,20 +284,31 @@ export function Search() {
               onMobileClose={() => setDrawerOpen(false)}
             />
 
-            {/* Grid */}
+            {/* Main view: Grid or Map */}
             <div className="flex-1 min-w-0">
-              <PropertyGrid
-                properties={filtered}
-                savedIds={savedIds}
-                onToggleSave={handleToggleSave}
-                loading={loading}
-                emptyVariant={allProperties.length === 0 ? 'no-listings' : 'search'}
-                emptyTitle={allProperties.length === 0 ? 'No accommodations available yet.' : 'No properties match your current filters.'}
-                emptyDescription={allProperties.length === 0 ? 'Properties listed by owners will appear here.' : 'Try adjusting or clearing your search filters to view more stays.'}
-                emptyActionLabel={allProperties.length === 0 ? (user?.role === 'OWNER' ? 'List Your Property' : 'Explore Campus Map') : 'Clear Filters'}
-                emptyActionTo={allProperties.length === 0 ? (user?.role === 'OWNER' ? '/post-property' : '/') : undefined}
-                onEmptyAction={allProperties.length === 0 ? undefined : resetFilters}
-              />
+              {viewMode === 'map' ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                      🗺️ Interactive Campus Map ({filtered.length} listings shown)
+                    </p>
+                  </div>
+                  <SearchMapView properties={filtered} />
+                </div>
+              ) : (
+                <PropertyGrid
+                  properties={filtered}
+                  savedIds={savedIds}
+                  onToggleSave={handleToggleSave}
+                  loading={loading}
+                  emptyVariant={allProperties.length === 0 ? 'no-listings' : 'search'}
+                  emptyTitle={allProperties.length === 0 ? 'No accommodations available yet.' : 'No properties match your current filters.'}
+                  emptyDescription={allProperties.length === 0 ? 'Properties listed by owners will appear here.' : 'Try adjusting or clearing your search filters to view more stays.'}
+                  emptyActionLabel={allProperties.length === 0 ? (user?.role === 'OWNER' ? 'List Your Property' : 'Explore Campus Map') : 'Clear Filters'}
+                  emptyActionTo={allProperties.length === 0 ? (user?.role === 'OWNER' ? '/post-property' : '/') : undefined}
+                  onEmptyAction={allProperties.length === 0 ? undefined : resetFilters}
+                />
+              )}
             </div>
           </div>
         </div>

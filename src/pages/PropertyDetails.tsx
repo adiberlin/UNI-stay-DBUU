@@ -16,6 +16,7 @@ import { DistanceBadge } from '../components/DistanceBadge';
 import { propertyService } from '../services/propertyService';
 import { useAuth } from '../context/AuthContext';
 import { PropertyCard } from '../components/PropertyCard';
+import { PropertyMap } from '../components/PropertyMap';
 import { useToast, Toast } from '../components/Toast';
 import type { Property } from '../types/property';
 
@@ -311,6 +312,15 @@ export function PropertyDetails() {
                     <AmenityItem key={a} name={a} variant="icon-grid" />
                   ))}
                 </div>
+              </motion.div>
+
+              {/* Google Map & DBUU Route */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <PropertyMap property={property} />
               </motion.div>
 
               {/* Similar stays */}

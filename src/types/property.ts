@@ -39,6 +39,7 @@ export interface Property {
   location: string;
   city: 'Dehradun';
   distanceFromDBUU: number; // in km
+  coordinates?: { lat: number; lng: number };
   roomType: RoomType;
   bhk?: number;
   bathrooms: number;
